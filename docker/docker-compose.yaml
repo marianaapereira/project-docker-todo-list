@@ -1,0 +1,39 @@
+# Todo arquivo docker-compose.yaml deve iniciar com a chave version que define qual versão deverá ser utilizada pelo Compose para interpretar o arquivo
+version: '3'
+
+# No Compose existe o conceito de services; a ordem dos serviços neste arquivo não é importante
+services:
+
+# exemplo
+#  frontend:
+#    build: frontend/ -> Especificamos o contexto, ou seja, a pasta onde está o Dockerfile; build especifica a pasta contendo um arquivo Dockerfile a partir do qual o Compose vai executar o comando docker build automaticamente
+#    ports: -> O formato da especificação é exatamente como utilizamos na flag -p
+#      - 3000:3000 -> O primeiro parâmetro é sempre a porta do computador local e o segundo parâmetro é a porta exposta no container
+#    restart: on-failure -> Dizemos ao Compose o que ele deve fazer caso um container pare sua execução, de maneira automática; on-failure: o container será reiniciado caso ocorra alguma falha
+#    depends_on: -> Lista quais serviços o Compose deve executar primeiro, antes de executar o serviço atual
+#      - backend -> Os serviços serão iniciados respeitando a ordem que especificamos: primeiro o serviço backend será iniciado, depois o serviço frontend
+
+  todofront:
+    build: ./todo-app/front-end/
+    ports:
+      - 3000:3000
+    restart: on-failure
+    depends_on:
+      - todoback
+    environment:
+      - REACT_APP_API_HOST=todoback
+
+  todoback:
+    build: ./todo-app/back-end/
+    ports:
+      - 3001:3001
+    restart: on-failure
+
+  todotests:
+    build: ./todo-app/tests/
+    restart: on-failure
+    depends_on:
+      - todofront
+      - todoback
+    environment:
+      - FRONT_HOST=todofront
